@@ -1,4 +1,4 @@
-//João Victor Bravo, Matheus Farias e Tiago Valença
+//João Victor Bravo, Matheus Farias, Tiago Valença
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,11 +10,9 @@ struct node {
     struct node *filhos[ordem];
 }*root = NULL;
 
-enum KeyStatus { Duplicado,Falhou,Sucesso,Insira,MenosChaves };
-
 void insert(int chave);
 void display(struct node *root,int);
-enum KeyStatus ins(struct node *r, int x, int* y, struct node** u);
+int ins(struct node *r, int x, int* y, struct node** u);
 int searchPos(int x,int *key_arr, int n);
 void eatline(void);
 
@@ -47,8 +45,8 @@ int main()
         default:
             printf("Wrong choice\n");
             break;
-        }/*End of switch*/
-    }/*End of while*/
+        }
+    }
     return 0;
 }
 
@@ -56,11 +54,11 @@ void insert(int chave)
 {
     struct node *newnode;
     int upKey;
-    enum KeyStatus value;
+    int value;
     value = ins(root, chave, &upKey, &newnode);
-    if (value == Duplicado)
+    if (value == 0)
         printf("Chave já existe\n");
-    if (value == Insira)
+    if (value == 1)
     {
         struct node *uproot = root;
         root=malloc(sizeof(struct node));
@@ -71,48 +69,44 @@ void insert(int chave)
     }
 }
 
-enum KeyStatus ins(struct node *ptr, int chave, int *upKey,struct node **newnode)
+int ins(struct node *ptr, int chave, int *upKey,struct node **newnode)
 {
     struct node *newPtr, *lastPtr;
     int pos, i, n,splitPos;
     int newKey, lastKey;
-    enum KeyStatus value;
+    int value;
     if (ptr == NULL)
     {
         *newnode = NULL;
         *upKey = chave;
-        return Insira;
+        return 1;
     }
     n = ptr->n;
     pos = searchPos(chave, ptr->chaves, n);
     if (pos < n && chave == ptr->chaves[pos])
-        return Duplicado;
+        return 0;
     value = ins(ptr->filhos[pos], chave, &newKey, &newPtr);
-    if (value != Insira)
+    if (value != 1)
         return value;
-    /*If chaves in node is less than M-1 where M is order of B tree*/
     if (n < ordem - 1)
     {
         pos = searchPos(newKey, ptr->chaves, n);
-        /*Shifting the chave and pointer right for inserting the new chave*/
         for (i=n; i>pos; i--)
         {
             ptr->chaves[i] = ptr->chaves[i-1];
             ptr->filhos[i+1] = ptr->filhos[i];
         }
-        /*Key is inserted at exact location*/
         ptr->chaves[pos] = newKey;
         ptr->filhos[pos+1] = newPtr;
-        ++ptr->n; /*incrementing the number of chaves in node*/
-        return Sucesso;
-    }/*End of if */
-    /*If chaves in nodes are maximum and position of node to be inserted is last*/
+        ++ptr->n;
+        return 3;
+    }
     if (pos == ordem - 1)
     {
         lastKey = newKey;
         lastPtr = newPtr;
     }
-    else /*If chaves in node are maximum and position of node to be inserted is not last*/
+    else
     {
         lastKey = ptr->chaves[ordem-2];
         lastPtr = ptr->filhos[ordem-1];
@@ -127,9 +121,9 @@ enum KeyStatus ins(struct node *ptr, int chave, int *upKey,struct node **newnode
     splitPos = (ordem - 1)/2;
     (*upKey) = ptr->chaves[splitPos];
 
-    (*newnode)=malloc(sizeof(struct node));/*Right node after split*/
-    ptr->n = splitPos; /*No. of chaves for left splitted node*/
-    (*newnode)->n = ordem-1-splitPos;/*No. of chaves for right splitted node*/
+    (*newnode)=malloc(sizeof(struct node));
+    ptr->n = splitPos;
+    (*newnode)->n = ordem-1-splitPos;
     for (i=0; i < (*newnode)->n; i++)
     {
         (*newnode)->filhos[i] = ptr->filhos[i + splitPos + 1];
@@ -139,8 +133,8 @@ enum KeyStatus ins(struct node *ptr, int chave, int *upKey,struct node **newnode
             (*newnode)->chaves[i] = lastKey;
     }
     (*newnode)->filhos[(*newnode)->n] = lastPtr;
-    return Insira;
-}/*End of ins()*/
+    return 1;
+}
 
 void display(struct node *ptr, int blanks)
 {
@@ -154,8 +148,8 @@ void display(struct node *ptr, int blanks)
         printf("\n");
         for (i=0; i <= ptr->n; i++)
             display(ptr->filhos[i], blanks+10);
-    }/*End of if*/
-}/*End of display()*/
+    }
+}
 
 int searchPos(int chave, int *key_arr, int n)
 {
@@ -163,7 +157,7 @@ int searchPos(int chave, int *key_arr, int n)
     while (pos < n && chave > key_arr[pos])
         pos++;
     return pos;
-}/*End of searchPos()*/
+}
 
 void eatline(void) {
   char c;
