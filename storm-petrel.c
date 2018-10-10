@@ -1,158 +1,159 @@
 //João Victor Bravo, Matheus Farias, Tiago Valença
 #include <stdio.h>
 #include <stdlib.h>
-#define ordem 5
+#define ordem 5 //a ordem da árvore só pode ser alterada antes do programa ser iniciado
 
 typedef struct bnode {
-    int num_chaves;
-    int chaves[ordem-1];
-    struct bnode *filhos[ordem];
+    int num_chaves; //numero de chaves no nó
+    int chaves[ordem-1]; //array de chaves que contem os valores inseridos no nó
+    struct bnode *filhos[ordem]; //array de ponteiros para os filhos do nó
 }arvore;
 
-arvore *root = NULL;
+arvore *root = NULL; //criação do nó raiz que começa como NULL
 
-void insert(int chave);
-void display(arvore *root,int);
-int ins(arvore *r, int x, int* y, arvore** u);
+//protótipo das funções que vão ser usadas no código
+void inserir(int chave);
+void display(arvore *root, int espacos);
+int validarInsercao(arvore *r, int x, int* y, arvore** u);
 int searchPos(int x,int *key_arr, int num_chaves);
 
 int main()
 {
-    int chave;
-    int choice;
+    int chave;//chave que irá ser adicionada
+    int escolha;//variavel para escolher dentre as funcionalidades do programa
     printf("Criação de uma árvore B de Ordem=%d\n",ordem);
     while(1)
     {
         printf("\n");
         printf("1.Inserir\n");
-        printf("2.Mostrar\n");
+        printf("2.Mostrar a árvore\n");
         printf("3.Sair\n");
         printf("Digite a sua escolha : ");
-        scanf("%d",&choice);
+        scanf("%d",&escolha);
 
-        switch(choice)
+        switch(escolha)//switch que recebe a variavel escolha
         {
-        case 1:
+        case 1: //no caso 1, o programa pede para o usuário digitar uma chave e chama a função inserir
             printf("Digite a chave : ");
             scanf("%d",&chave);
-            insert(chave);
-            break;
-        case 2:
+            inserir(chave);
+            break; //break para sair do switch e voltar para o menu
+        case 2: //no caso 2 ele chama a função display que mostra a árvore B
             printf("árvore B:\n");
             display(root,0);
-            break;
+            break; //break para sair do switch e voltar para o menu
         case 3:
-            exit(1);
+            exit(1); //fecha o programa
         default:
             printf("Faça uma escolha válida\n");
-            break;
+            break; //break para sair do switch e voltar para o menu
         }
     }
     return 0;
 }
 
-void insert(int chave)
+void inserir(int chave)//a função inserir recebe um valor inteiro "chave"
 {
-    arvore *newnode;
-    int upKey;
-    int value;
-    value = ins(root, chave, &upKey, &newnode);
-    if (value == 0)
+    arvore *newnode; //criação de um novo nó que poderá ser utilizado caso o numero de valores no nó raiz após a insercao seja maior que ordem-1
+    int chaveAadd; //chave que será adicionada ao final da função inserir
+    int flag; //uma Flag que indica se o valor da chave já existe na árvore ou não
+    flag = validarInsercao(root, chave, &chaveAadd, &newnode); //a flag vai receber o valor da funçao validarInsercao
+    if (!flag) //se a flag for falsa a chave já existe na árvore
         printf("Chave já existe\n");
-    if (value == 1)
+    if (flag == 1) //se a flag for 1 significa que ocorreu o split no nó anterior então deveremos criar um novo nó pai
     {
-        arvore *uproot = root;
-        root=malloc(sizeof(arvore));
-        root->num_chaves = 1;
-        root->chaves[0] = upKey;
-        root->filhos[0] = uproot;
-        root->filhos[1] = newnode;
+        arvore *filhoE = root; //criamos um nó filhoE que vai ser igual ao no raiz que foi alterado na função validarInsercao
+        root = malloc(sizeof(arvore));
+        root->num_chaves = 1; //o nó pai vai ter 1 valor que subiu no split
+        root->chaves[0] = chaveAadd; //o valor que vai subir no split é a chaveAadd
+        root->filhos[0] = filhoE; //o primeiro ponteiro do array de filhos aponta para o filhoE
+        root->filhos[1] = newnode; //o segundo ponteiro do array de filhos aponta para o newnode que foi alterado na função validarInsercao
     }
 }
 
-int ins(arvore *ptr, int chave, int *upKey,arvore **newnode)
+int validarInsercao(arvore *raiz, int chave, int *chaveAadd, arvore **newnode)
 {
-    arvore *newPtr, *lastPtr;
-    int pos, i, num_chaves,splitPos;
-    int newKey, lastKey;
-    int value;
-    if (ptr == NULL)
+    arvore *novoNo, *ultimoNo;
+    int pos, i, num_chaves, splitPos;
+    int novaChave, ultimaChave;
+    int flag;
+    if (raiz == NULL)
     {
         *newnode = NULL;
-        *upKey = chave;
+        *chaveAadd = chave;
         return 1;
     }
-    num_chaves = ptr->num_chaves;
-    pos = searchPos(chave, ptr->chaves, num_chaves);
-    if (pos < num_chaves && chave == ptr->chaves[pos])
+    num_chaves = raiz->num_chaves;
+    pos = searchPos(chave, raiz->chaves, num_chaves);
+    if (pos < num_chaves && chave == raiz->chaves[pos])
         return 0;
-    value = ins(ptr->filhos[pos], chave, &newKey, &newPtr);
-    if (value != 1)
-        return value;
+    flag = validarInsercao(raiz->filhos[pos], chave, &novaChave, &novoNo);
+    if (flag != 1)
+        return flag;
     if (num_chaves < ordem - 1)
     {
-        pos = searchPos(newKey, ptr->chaves, num_chaves);
+        pos = searchPos(novaChave, raiz->chaves, num_chaves);
         for (i=num_chaves; i>pos; i--)
         {
-            ptr->chaves[i] = ptr->chaves[i-1];
-            ptr->filhos[i+1] = ptr->filhos[i];
+            raiz->chaves[i] = raiz->chaves[i-1];
+            raiz->filhos[i+1] = raiz->filhos[i];
         }
-        ptr->chaves[pos] = newKey;
-        ptr->filhos[pos+1] = newPtr;
-        ++ptr->num_chaves;
+        raiz->chaves[pos] = novaChave;
+        raiz->filhos[pos+1] = novoNo;
+        raiz->num_chaves++;
         return 3;
     }
     if (pos == ordem - 1)
     {
-        lastKey = newKey;
-        lastPtr = newPtr;
+        ultimaChave = novaChave;
+        ultimoNo = novoNo;
     }
     else
     {
-        lastKey = ptr->chaves[ordem-2];
-        lastPtr = ptr->filhos[ordem-1];
+        ultimaChave = raiz->chaves[ordem-2];
+        ultimoNo = raiz->filhos[ordem-1];
         for (i=ordem-2; i>pos; i--)
         {
-            ptr->chaves[i] = ptr->chaves[i-1];
-            ptr->filhos[i+1] = ptr->filhos[i];
+            raiz->chaves[i] = raiz->chaves[i-1];
+            raiz->filhos[i+1] = raiz->filhos[i];
         }
-        ptr->chaves[pos] = newKey;
-        ptr->filhos[pos+1] = newPtr;
+        raiz->chaves[pos] = novaChave;
+        raiz->filhos[pos+1] = novoNo;
     }
     splitPos = (ordem - 1)/2;
-    (*upKey) = ptr->chaves[splitPos];
+    (*chaveAadd) = raiz->chaves[splitPos];
 
     (*newnode)=malloc(sizeof(arvore));
-    ptr->num_chaves = splitPos;
+    raiz->num_chaves = splitPos;
     (*newnode)->num_chaves = ordem-1-splitPos;
     for (i=0; i < (*newnode)->num_chaves; i++)
     {
-        (*newnode)->filhos[i] = ptr->filhos[i + splitPos + 1];
+        (*newnode)->filhos[i] = raiz->filhos[i + splitPos + 1];
         if(i < (*newnode)->num_chaves - 1)
-            (*newnode)->chaves[i] = ptr->chaves[i + splitPos + 1];
+            (*newnode)->chaves[i] = raiz->chaves[i + splitPos + 1];
         else
-            (*newnode)->chaves[i] = lastKey;
+            (*newnode)->chaves[i] = ultimaChave;
     }
-    (*newnode)->filhos[(*newnode)->num_chaves] = lastPtr;
+    (*newnode)->filhos[(*newnode)->num_chaves] = ultimoNo;
     return 1;
 }
 
-void display(arvore *ptr, int blanks)
+void display(arvore *raiz, int espacos)
 {
-    if (ptr)
+    if (raiz)
     {
         int i;
-        for(i=1; i<=blanks; i++)
+        for(i=1; i < espacos; i++)
             printf(" ");
         printf("[");
-        for (i=0; i < ptr->num_chaves; i++){
-          if(i!=ptr->num_chaves-1) printf("%d ",ptr->chaves[i]);
-          else printf("%d",ptr->chaves[i]);
+        for (i = 0; i < raiz->num_chaves; i++){
+          if(i != raiz->num_chaves-1) printf("%d ",raiz->chaves[i]);
+          else printf("%d",raiz->chaves[i]);
         }
         printf("]");
         printf("\n");
-        for (i=0; i <= ptr->num_chaves; i++)
-            display(ptr->filhos[i], blanks+10);
+        for (i = 0; i <= raiz->num_chaves; i++)
+            display(raiz->filhos[i], espacos+10);
     }
 }
 
