@@ -5,15 +5,16 @@
 #define ordem 5
 
 struct node {
-    int n;
+    int num_chaves;
     int chaves[ordem-1];
     struct node *filhos[ordem];
+    int h;
 }*root = NULL;
 
 void insert(int chave);
 void display(struct node *root,int);
 int ins(struct node *r, int x, int* y, struct node** u);
-int searchPos(int x,int *key_arr, int n);
+int searchPos(int x,int *key_arr, int num_chaves);
 void eatline(void);
 
 int main()
@@ -62,7 +63,7 @@ void insert(int chave)
     {
         struct node *uproot = root;
         root=malloc(sizeof(struct node));
-        root->n = 1;
+        root->num_chaves = 1;
         root->chaves[0] = upKey;
         root->filhos[0] = uproot;
         root->filhos[1] = newnode;
@@ -72,7 +73,7 @@ void insert(int chave)
 int ins(struct node *ptr, int chave, int *upKey,struct node **newnode)
 {
     struct node *newPtr, *lastPtr;
-    int pos, i, n,splitPos;
+    int pos, i, num_chaves,splitPos;
     int newKey, lastKey;
     int value;
     if (ptr == NULL)
@@ -81,24 +82,24 @@ int ins(struct node *ptr, int chave, int *upKey,struct node **newnode)
         *upKey = chave;
         return 1;
     }
-    n = ptr->n;
-    pos = searchPos(chave, ptr->chaves, n);
-    if (pos < n && chave == ptr->chaves[pos])
+    num_chaves = ptr->num_chaves;
+    pos = searchPos(chave, ptr->chaves, num_chaves);
+    if (pos < num_chaves && chave == ptr->chaves[pos])
         return 0;
     value = ins(ptr->filhos[pos], chave, &newKey, &newPtr);
     if (value != 1)
         return value;
-    if (n < ordem - 1)
+    if (num_chaves < ordem - 1)
     {
-        pos = searchPos(newKey, ptr->chaves, n);
-        for (i=n; i>pos; i--)
+        pos = searchPos(newKey, ptr->chaves, num_chaves);
+        for (i=num_chaves; i>pos; i--)
         {
             ptr->chaves[i] = ptr->chaves[i-1];
             ptr->filhos[i+1] = ptr->filhos[i];
         }
         ptr->chaves[pos] = newKey;
         ptr->filhos[pos+1] = newPtr;
-        ++ptr->n;
+        ++ptr->num_chaves;
         return 3;
     }
     if (pos == ordem - 1)
@@ -122,17 +123,17 @@ int ins(struct node *ptr, int chave, int *upKey,struct node **newnode)
     (*upKey) = ptr->chaves[splitPos];
 
     (*newnode)=malloc(sizeof(struct node));
-    ptr->n = splitPos;
-    (*newnode)->n = ordem-1-splitPos;
-    for (i=0; i < (*newnode)->n; i++)
+    ptr->num_chaves = splitPos;
+    (*newnode)->num_chaves = ordem-1-splitPos;
+    for (i=0; i < (*newnode)->num_chaves; i++)
     {
         (*newnode)->filhos[i] = ptr->filhos[i + splitPos + 1];
-        if(i < (*newnode)->n - 1)
+        if(i < (*newnode)->num_chaves - 1)
             (*newnode)->chaves[i] = ptr->chaves[i + splitPos + 1];
         else
             (*newnode)->chaves[i] = lastKey;
     }
-    (*newnode)->filhos[(*newnode)->n] = lastPtr;
+    (*newnode)->filhos[(*newnode)->num_chaves] = lastPtr;
     return 1;
 }
 
@@ -143,18 +144,22 @@ void display(struct node *ptr, int blanks)
         int i;
         for(i=1; i<=blanks; i++)
             printf(" ");
-        for (i=0; i < ptr->n; i++)
-            printf("%d ",ptr->chaves[i]);
+        printf("[");
+        for (i=0; i < ptr->num_chaves; i++){
+          if(i!=ptr->num_chaves-1) printf("%d ",ptr->chaves[i]);
+          else printf("%d",ptr->chaves[i]);
+        }
+        printf("]");
         printf("\n");
-        for (i=0; i <= ptr->n; i++)
+        for (i=0; i <= ptr->num_chaves; i++)
             display(ptr->filhos[i], blanks+10);
     }
 }
 
-int searchPos(int chave, int *key_arr, int n)
+int searchPos(int chave, int *key_arr, int num_chaves)
 {
     int pos=0;
-    while (pos < n && chave > key_arr[pos])
+    while (pos < num_chaves && chave > key_arr[pos])
         pos++;
     return pos;
 }
