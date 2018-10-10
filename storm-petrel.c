@@ -8,7 +8,6 @@ typedef struct bnode {
     int num_chaves;
     int chaves[ordem-1];
     struct bnode *filhos[ordem];
-    int h;
 }arvore;
 
 arvore *root = NULL;
