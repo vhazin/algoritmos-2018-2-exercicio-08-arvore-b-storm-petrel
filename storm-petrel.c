@@ -15,7 +15,6 @@ void insert(int chave);
 void display(struct node *root,int);
 int ins(struct node *r, int x, int* y, struct node** u);
 int searchPos(int x,int *key_arr, int num_chaves);
-void eatline(void);
 
 int main()
 {
@@ -24,17 +23,18 @@ int main()
     printf("Criação de uma árvore B de Ordem=%d\n",ordem);
     while(1)
     {
+        printf("\n");
         printf("1.Inserir\n");
         printf("2.Mostrar\n");
         printf("3.Sair\n");
         printf("Digite a sua escolha : ");
-        scanf("%d",&choice); eatline();
+        scanf("%d",&choice);
 
         switch(choice)
         {
         case 1:
             printf("Digite a chave : ");
-            scanf("%d",&chave); eatline();
+            scanf("%d",&chave);
             insert(chave);
             break;
         case 2:
@@ -162,10 +162,4 @@ int searchPos(int chave, int *key_arr, int num_chaves)
     while (pos < num_chaves && chave > key_arr[pos])
         pos++;
     return pos;
-}
-
-void eatline(void) {
-  char c;
-  printf("");
-  while (c=getchar()!='\n') ;
 }
