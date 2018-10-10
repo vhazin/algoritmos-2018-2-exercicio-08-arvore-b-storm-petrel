@@ -1,5 +1,4 @@
 //João Victor Bravo, Matheus Farias, Tiago Valença
-
 #include <stdio.h>
 #include <stdlib.h>
 #define ordem 5
