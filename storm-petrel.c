@@ -8,7 +8,6 @@ struct node {
     int num_chaves;
     int chaves[ordem-1];
     struct node *filhos[ordem];
-    int h;
 }*root = NULL;
 
 void insert(int chave);
