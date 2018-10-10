@@ -1,7 +1,10 @@
 //João Victor Bravo, Matheus Farias, Tiago Valença
+
 #include <stdio.h>
 #include <stdlib.h>
-#define ordem 5 //a ordem da árvore só pode ser alterada antes do programa ser iniciado
+#define ordem 5
+/*a ordem da árvore só pode ser alterada
+antes do programa ser iniciado*/
 
 typedef struct bnode {
     int num_chaves; //numero de chaves no nó
@@ -15,13 +18,13 @@ arvore *root = NULL; //criação do nó raiz que começa como NULL
 void inserir(int chave);
 void display(arvore *root, int espacos);
 int validarInsercao(arvore *r, int x, int* y, arvore** u);
-int searchPos(int x,int *key_arr, int num_chaves);
+int procurarPos(int x,int *chaves, int num_chaves);
 
 int main()
 {
     int chave;//chave que irá ser adicionada
     int escolha;//variavel para escolher dentre as funcionalidades do programa
-    printf("Criação de uma árvore B de Ordem=%d\n",ordem);
+    printf("Criação de uma árvore B de Ordem = %d\n",ordem);
     while(1)
     {
         printf("\n");
@@ -31,20 +34,23 @@ int main()
         printf("Digite a sua escolha : ");
         scanf("%d",&escolha);
 
-        switch(escolha)//switch que recebe a variavel escolha
+        switch(escolha) //switch que recebe a variavel escolha
         {
         case 1: //no caso 1, o programa pede para o usuário digitar uma chave e chama a função inserir
             printf("Digite a chave : ");
             scanf("%d",&chave);
             inserir(chave);
             break; //break para sair do switch e voltar para o menu
+
         case 2: //no caso 2 ele chama a função display que mostra a árvore B
             printf("árvore B:\n");
             display(root,0);
             break; //break para sair do switch e voltar para o menu
+
         case 3:
             exit(1); //fecha o programa
-        default:
+
+        default: //caso qualquer outro valor for digitado a escolha é inválida
             printf("Faça uma escolha válida\n");
             break; //break para sair do switch e voltar para o menu
         }
@@ -54,45 +60,83 @@ int main()
 
 void inserir(int chave)//a função inserir recebe um valor inteiro "chave"
 {
-    arvore *newnode; //criação de um novo nó que poderá ser utilizado caso o numero de valores no nó raiz após a insercao seja maior que ordem-1
+    arvore *newnode;
+    /*criação de um novo nó que poderá ser utilizado caso o numero
+    de valores no nó raiz após a insercao seja maior que ordem-1*/
+
     int chaveAadd; //chave que será adicionada ao final da função inserir
     int flag; //uma Flag que indica se o valor da chave já existe na árvore ou não
-    flag = validarInsercao(root, chave, &chaveAadd, &newnode); //a flag vai receber o valor da funçao validarInsercao
-    if (!flag) //se a flag for falsa a chave já existe na árvore
-        printf("Chave já existe\n");
-    if (flag == 1) //se a flag for 1 significa que ocorreu o split no nó anterior então deveremos criar um novo nó pai
+
+    flag = validarInsercao(root, chave, &chaveAadd, &newnode);
+    //a flag vai receber o valor da funçao validarInsercao
+    if (!flag)  printf("Chave já existe\n");
+    //se a flag for falsa a chave já existe na árvore
+  
+    if (flag == 1)
+    /*se a flag for 1 significa que ocorreu o split no nó anterior então
+    deveremos criar um novo nó pai*/
     {
-        arvore *filhoE = root; //criamos um nó filhoE que vai ser igual ao no raiz que foi alterado na função validarInsercao
-        root = malloc(sizeof(arvore));
-        root->num_chaves = 1; //o nó pai vai ter 1 valor que subiu no split
+        arvore *filhoE = root;
+        //criamos um nó filhoE que vai ser igual ao no raiz que foi alterado na função validarInsercao
+
+        root = malloc(sizeof(arvore)); //aloca o espaço de memória para o nó raiz
+
+        root->num_chaves = 1; //o nó raiz vai ter 1 valor que subiu no split
+
         root->chaves[0] = chaveAadd; //o valor que vai subir no split é a chaveAadd
+
         root->filhos[0] = filhoE; //o primeiro ponteiro do array de filhos aponta para o filhoE
-        root->filhos[1] = newnode; //o segundo ponteiro do array de filhos aponta para o newnode que foi alterado na função validarInsercao
+
+        root->filhos[1] = newnode;
+        /*o segundo ponteiro do array de filhos aponta para o newnode que foi
+        alterado na função validarInsercao*/
     }
 }
 
 int validarInsercao(arvore *raiz, int chave, int *chaveAadd, arvore **newnode)
 {
     arvore *novoNo, *ultimoNo;
+    //caso ocorra o split precisamos criar dois novos nós
+
     int pos, i, num_chaves, splitPos;
+    /*inteiros para posição onde deve ser adicionado o nó, i um valor de iteração, o num_chaves
+    do nó e a posição que deve subir caso ocorra um split*/
+
     int novaChave, ultimaChave;
-    int flag;
-    if (raiz == NULL)
+    /*uma nova chave que funcionará como a chaveAadd na recursividade e a ultimaChave
+    que recebe a chave na ultima posição do array de chaves*/
+
+    int flag; //essa flag irá ser utilizada na recursividade
+    if (raiz == NULL) // se não existir nada na árvore
     {
-        *newnode = NULL;
+        *newnode = NULL; //não vai existir a necessidade de um novo nó
         *chaveAadd = chave;
-        return 1;
+        /*não vai ocorrer um split, portanto a chave que deve ser adicionada
+        no nó "raiz" deve ser a própria chave passada no inserir*/
+
+        return 1; //return a flag como 1
     }
-    num_chaves = raiz->num_chaves;
-    pos = searchPos(chave, raiz->chaves, num_chaves);
-    if (pos < num_chaves && chave == raiz->chaves[pos])
-        return 0;
+
+    num_chaves = raiz->num_chaves; //essa variável existe apenas para facilitar a leitura do código
+
+    pos = procurarPos(chave, raiz->chaves, num_chaves);
+    //a função procurarPos vai retornar o filho onde a chave deve ser inserida
+
+    if (pos < num_chaves && chave == raiz->chaves[pos]) return 0;
+    /*caso a posição de inserçaõ for menor que o numero de chaves no array e a chave que se encontra
+    atualmente na posição onde deveria ocorrer a inserção for igual a chave que se quer adicionar,
+    a chave já existe na árvore!*/
+
     flag = validarInsercao(raiz->filhos[pos], chave, &novaChave, &novoNo);
-    if (flag != 1)
-        return flag;
+    /*recursividade indo no filho do nó baseado no resultado da função procurarPos, a chave que se quer adicionar, a novaChave que funciona como a chaveAadd e o novoNo para caso ocorra o split*/
+
+    if (flag != 1) return flag;
+    /*se a chave for diferente de 1 significa que não vai ocorrer
+    o split portanto não são necessários os passos a seguir*/
+
     if (num_chaves < ordem - 1)
     {
-        pos = searchPos(novaChave, raiz->chaves, num_chaves);
+        pos = procurarPos(novaChave, raiz->chaves, num_chaves);
         for (i=num_chaves; i>pos; i--)
         {
             raiz->chaves[i] = raiz->chaves[i-1];
@@ -157,10 +201,15 @@ void display(arvore *raiz, int espacos)
     }
 }
 
-int searchPos(int chave, int *key_arr, int num_chaves)
+int procurarPos(int chave, int *chaves, int num_chaves)
+  /*a função procurarPos vai receber uma chave, um array de chaves
+  e o numero de chaves presentes no array*/
 {
-    int pos=0;
-    while (pos < num_chaves && chave > key_arr[pos])
-        pos++;
-    return pos;
+    int pos=0; //valor de iteração
+
+    while (pos < num_chaves && chave > chaves[pos]) pos++;
+    /*enquanto pos for menor que o numero de chaves no nó e o valor da chave for maior que o valor no array chaves na posição pos pos vai aumentar em 1, fazendo isso encontraremos posição onde a chave deve ser adicionada
+    ou o filho para onde ela deve ser direcionada*/
+
+    return pos;//retorna a posição
 }
