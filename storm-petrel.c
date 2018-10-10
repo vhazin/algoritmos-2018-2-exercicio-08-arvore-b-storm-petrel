@@ -4,15 +4,18 @@
 #include <stdlib.h>
 #define ordem 5
 
-struct node {
+typedef struct bnode {
     int num_chaves;
     int chaves[ordem-1];
-    struct node *filhos[ordem];
-}*root = NULL;
+    struct bnode *filhos[ordem];
+    int h;
+}arvore;
+
+arvore *root = NULL;
 
 void insert(int chave);
-void display(struct node *root,int);
-int ins(struct node *r, int x, int* y, struct node** u);
+void display(arvore *root,int);
+int ins(arvore *r, int x, int* y, arvore** u);
 int searchPos(int x,int *key_arr, int num_chaves);
 
 int main()
@@ -52,7 +55,7 @@ int main()
 
 void insert(int chave)
 {
-    struct node *newnode;
+    arvore *newnode;
     int upKey;
     int value;
     value = ins(root, chave, &upKey, &newnode);
@@ -60,8 +63,8 @@ void insert(int chave)
         printf("Chave já existe\n");
     if (value == 1)
     {
-        struct node *uproot = root;
-        root=malloc(sizeof(struct node));
+        arvore *uproot = root;
+        root=malloc(sizeof(arvore));
         root->num_chaves = 1;
         root->chaves[0] = upKey;
         root->filhos[0] = uproot;
@@ -69,9 +72,9 @@ void insert(int chave)
     }
 }
 
-int ins(struct node *ptr, int chave, int *upKey,struct node **newnode)
+int ins(arvore *ptr, int chave, int *upKey,arvore **newnode)
 {
-    struct node *newPtr, *lastPtr;
+    arvore *newPtr, *lastPtr;
     int pos, i, num_chaves,splitPos;
     int newKey, lastKey;
     int value;
@@ -121,7 +124,7 @@ int ins(struct node *ptr, int chave, int *upKey,struct node **newnode)
     splitPos = (ordem - 1)/2;
     (*upKey) = ptr->chaves[splitPos];
 
-    (*newnode)=malloc(sizeof(struct node));
+    (*newnode)=malloc(sizeof(arvore));
     ptr->num_chaves = splitPos;
     (*newnode)->num_chaves = ordem-1-splitPos;
     for (i=0; i < (*newnode)->num_chaves; i++)
@@ -136,7 +139,7 @@ int ins(struct node *ptr, int chave, int *upKey,struct node **newnode)
     return 1;
 }
 
-void display(struct node *ptr, int blanks)
+void display(arvore *ptr, int blanks)
 {
     if (ptr)
     {
