@@ -96,15 +96,16 @@ void inserir(int chave)//a função inserir recebe um valor inteiro "chave"
 int validarInsercao(arvore *raiz, int chave, int *chaveAadd, arvore **newnode)
 {
     arvore *novoNo, *ultimoNo;
-    //caso ocorra o split precisamos criar dois novos nós
+    /*caso ocorra o split precisamos criar um novo nó também criamos um ponteiro que vai apontar para o ultimo nó no array de filhos caso
+    o array já estiver cheio no momento da inserção*/
 
-    int pos, i, num_chaves, splitPos;
-    /*inteiros para posição onde deve ser adicionado o nó, i um valor de iteração, o num_chaves
+    int pos, num_chaves, splitPos;
+    /*inteiros para posição onde deve ser adicionado o nó, o num_chaves
     do nó e a posição que deve subir caso ocorra um split*/
 
     int novaChave, ultimaChave;
-    /*uma nova chave que funcionará como a chaveAadd na recursividade e a ultimaChave
-    que recebe a chave na ultima posição do array de chaves*/
+    /*uma nova chave que funcionará como a chaveAadd na recursividade e a ultimaChave que recebe a chave na ultima posição do array de chaves
+    caso o array estiver cheio no momento da inserção*/
 
     int flag; //essa flag irá ser utilizada na recursividade
     if (raiz == NULL) // se não existir nada na árvore
@@ -131,32 +132,54 @@ int validarInsercao(arvore *raiz, int chave, int *chaveAadd, arvore **newnode)
     /*recursividade indo no filho do nó baseado no resultado da função procurarPos, a chave que se quer adicionar, a novaChave que funciona como a chaveAadd e o novoNo para caso ocorra o split*/
 
     if (flag != 1) return flag;
-    /*se a chave for diferente de 1 significa que não vai ocorrer
-    o split portanto não são necessários os passos a seguir*/
+    /*se a flag for diferente de 1 significa que a inserção já
+    aconteceu e não ocorreu o split*/
 
     if (num_chaves < ordem - 1)
+    /*se o numero de chaves for menor que (ordem - 1) significa que
+    o nó ainda não está cheio portanto podemos adicionar o valor
+    nele sem problemas*/
     {
         pos = procurarPos(novaChave, raiz->chaves, num_chaves);
-        for (i=num_chaves; i>pos; i--)
+        /*o local onde deve ocorrer a inserção*/
+
+        for (int i = num_chaves; i>pos; i--)
+        /*vamos trazendo para trás no array as chaves que são
+        maiores do que a chave que queremos adicionar*/
         {
             raiz->chaves[i] = raiz->chaves[i-1];
+            //a chave move uma posição a direita no array;
             raiz->filhos[i+1] = raiz->filhos[i];
+            //os ponteiros para filhos movem uma posição a direita
         }
-        raiz->chaves[pos] = novaChave;
+        raiz->chaves[pos] = novaChave; //a posição recebe a novaChave
         raiz->filhos[pos+1] = novoNo;
-        raiz->num_chaves++;
-        return 3;
+        /*o ponteiro do array de filhos entre a novaChave e a chave
+        imediatamente maior que ela vai apontar para o novoNo*/
+        
+        raiz->num_chaves++; //aumentando o contador de chaves no nó
+
+        return 2;
+        //se a flag for igual a 2 significa que a inserção já ocorreu
     }
+
     if (pos == ordem - 1)
+    /*se a posição para se adicionar for a ultima e o nó
+    já estiver cheio*/  
     {
         ultimaChave = novaChave;
+        //ultimaChave vai guardar o valor da novaChave
+
         ultimoNo = novoNo;
+        //ultimoNo vai guardar o valor do novoNo
     }
     else
+    /*se a posição para se adicionar não for a ultima e o nó
+    já estiver cheio*/  
     {
         ultimaChave = raiz->chaves[ordem-2];
         ultimoNo = raiz->filhos[ordem-1];
-        for (i=ordem-2; i>pos; i--)
+        for (int i=ordem-2; i>pos; i--)
         {
             raiz->chaves[i] = raiz->chaves[i-1];
             raiz->filhos[i+1] = raiz->filhos[i];
@@ -170,7 +193,7 @@ int validarInsercao(arvore *raiz, int chave, int *chaveAadd, arvore **newnode)
     (*newnode)=malloc(sizeof(arvore));
     raiz->num_chaves = splitPos;
     (*newnode)->num_chaves = ordem-1-splitPos;
-    for (i=0; i < (*newnode)->num_chaves; i++)
+    for (int i=0; i < (*newnode)->num_chaves; i++)
     {
         (*newnode)->filhos[i] = raiz->filhos[i + splitPos + 1];
         if(i < (*newnode)->num_chaves - 1)
@@ -186,17 +209,16 @@ void display(arvore *raiz, int espacos)
 {
     if (raiz)
     {
-        int i;
-        for(i=1; i < espacos; i++)
+        for(int i=1; i < espacos; i++)
             printf(" ");
         printf("[");
-        for (i = 0; i < raiz->num_chaves; i++){
+        for (int i = 0; i < raiz->num_chaves; i++){
           if(i != raiz->num_chaves-1) printf("%d ",raiz->chaves[i]);
           else printf("%d",raiz->chaves[i]);
         }
         printf("]");
         printf("\n");
-        for (i = 0; i <= raiz->num_chaves; i++)
+        for (int i = 0; i <= raiz->num_chaves; i++)
             display(raiz->filhos[i], espacos+10);
     }
 }
