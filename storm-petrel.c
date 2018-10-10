@@ -178,7 +178,13 @@ int validarInsercao(arvore *raiz, int chave, int *chaveAadd, arvore **newnode)
     já estiver cheio*/  
     {
         ultimaChave = raiz->chaves[ordem-2];
+        /*ultimaChave vai receber o valor que era igual ao
+        ultimo valor que estava dentro do array*/
+
         ultimoNo = raiz->filhos[ordem-1];
+        /*ultimoNo vai receber o nó que era igual ao
+        ultimo filho que estava dentro do array*/
+        
         for (int i=ordem-2; i>pos; i--)
         {
             raiz->chaves[i] = raiz->chaves[i-1];
@@ -207,19 +213,27 @@ int validarInsercao(arvore *raiz, int chave, int *chaveAadd, arvore **newnode)
 
 void display(arvore *raiz, int espacos)
 {
-    if (raiz)
+    if (raiz) //se o nó não for NULL
     {
-        for(int i=1; i < espacos; i++)
-            printf(" ");
-        printf("[");
+        for(int i=1; i < espacos; i++) printf(" ");
+        /*os espaços em branco começam como 0 e aumentam em 10
+        a cada nível abaixo*/
+        printf("["); //para facilitar a visualização do nó
+
         for (int i = 0; i < raiz->num_chaves; i++){
           if(i != raiz->num_chaves-1) printf("%d ",raiz->chaves[i]);
+          //printar os valores no nó espaçados até o ultimo
           else printf("%d",raiz->chaves[i]);
+          //o ultimo valor não precisa de um espaço após ele
         }
-        printf("]");
-        printf("\n");
+
+        printf("]"); //para facilitar a visualização do nó
+        printf("\n"); //facilitar a visualização dos nós
+
         for (int i = 0; i <= raiz->num_chaves; i++)
             display(raiz->filhos[i], espacos+10);
+        /*iteração para aumentar os espaçoes em branco e mostrar os filhos
+        de cada pai corretamente e de maneira fácil*/
     }
 }
 
