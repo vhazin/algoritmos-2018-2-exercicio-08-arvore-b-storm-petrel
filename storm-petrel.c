@@ -49,6 +49,7 @@ int main()
 
         case 3:
             exit(1); //fecha o programa
+            break;
 
         default: //caso qualquer outro valor for digitado a escolha é inválida
             printf("Faça uma escolha válida\n");
