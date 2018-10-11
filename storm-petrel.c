@@ -197,29 +197,60 @@ int validarInsercao(arvore *raiz, int chave, int *chaveAadd, arvore **newnode)
         ultimo filho que estava dentro do array*/
 
         for (int i=ordem-2; i>pos; i--)
+        /*iterando de tras do array para frente trazendo as
+        chaves e os filhos uma posição para direita até chegar
+        na posição de inserção*/
         {
             raiz->chaves[i] = raiz->chaves[i-1];
             raiz->filhos[i+1] = raiz->filhos[i];
         }
         raiz->chaves[pos] = novaChave;
         raiz->filhos[pos+1] = novoNo;
+        //insere a novaChave e o novoNo nas posições de inserção corretas
     }
     splitPos = (ordem - 1)/2;
-    (*chaveAadd) = raiz->chaves[splitPos];
+    /*a posição da chave que irá subir no split é igual a
+    posição do meio no array de chaves*/
 
-    (*newnode)=malloc(sizeof(arvore));
+    (*chaveAadd) = raiz->chaves[splitPos];
+    /*o valor da chaveAadd será igual ao da chave
+    na posição do split*/ 
+
+    (*newnode)=malloc(sizeof(arvore));//filho da direita após o split
+
     raiz->num_chaves = splitPos;
-    (*newnode)->num_chaves = ordem-1-splitPos;
+    /*o numero de chaves que vai permanecer no nó,
+    que vai virar o filho da esquerda, é o numero
+    mínimo, que é a metade do tamanho do array que
+    é o mesmo que o valor de splitPos*/
+
+    (*newnode)->num_chaves = splitPos;
+    /*o numero de chaves do filho da direita começa
+    como o numero mínimo, que é a metade do tamanho
+    do array que é o mesmo que o valor de splitPos*/
+
     for (int i=0; i < (*newnode)->num_chaves; i++)
+    /*desde (i=0) enquanto i for menor que o número
+    de chaves no newnode o valor de i aumenta em 1*/
     {
         (*newnode)->filhos[i] = raiz->filhos[i + splitPos + 1];
+        /*o newnode recebe os filhos do antigo nó raiz
+        que vem depois da posição de split*/
+
         if(i < (*newnode)->num_chaves - 1)
-            (*newnode)->chaves[i] = raiz->chaves[i + splitPos + 1];
-        else
-            (*newnode)->chaves[i] = ultimaChave;
+        (*newnode)->chaves[i] = raiz->chaves[i + splitPos + 1];
+        /*os valores do newnode vão ser iguais aos valores do
+        antigo nó raiz após a posição de split*/
+
+        else (*newnode)->chaves[i] = ultimaChave;
+        /*se todas as chaves que estavam no array já foram
+        transportadas o newnode recebe o valor que estava
+        sendo guardado na variavel ultimaChave*/
     }
     (*newnode)->filhos[(*newnode)->num_chaves] = ultimoNo;
-    return 1;
+    /*se todos os filhos já foram transportados o newnode
+    recebe o filho que estava guardado na variavel ultimoNo*/
+    return 1; //retorna 1 pois o split ocorreu
 }
 
 void display(arvore *raiz, int espacos)
